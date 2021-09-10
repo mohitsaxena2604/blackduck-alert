@@ -19,15 +19,19 @@ public class MockProcessingAuditAccessor implements ProcessingAuditAccessor {
 
     @Override
     public void setAuditEntrySuccess(UUID jobId, Set<Long> notificationIds) {
-
+        //Do Nothing
     }
 
     @Override
     public void setAuditEntryFailure(UUID jobId, Set<Long> notificationIds, String errorMessage, @Nullable Throwable exception) {
-
+        //Do Nothing
     }
 
     public Map<UUID, Set<Long>> getAuditEntries() {
         return auditEntries;
+    }
+
+    public Set<Long> getNotificationIds(UUID jobId) {
+        return auditEntries.get(jobId);
     }
 }

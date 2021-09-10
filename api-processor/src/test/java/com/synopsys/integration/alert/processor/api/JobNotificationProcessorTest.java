@@ -1,7 +1,11 @@
 package com.synopsys.integration.alert.processor.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -14,10 +18,10 @@ import com.synopsys.integration.alert.common.AlertProperties;
 import com.synopsys.integration.alert.common.enumeration.ProcessingType;
 import com.synopsys.integration.alert.common.message.model.LinkableItem;
 import com.synopsys.integration.alert.common.persistence.accessor.ConfigurationAccessor;
-import com.synopsys.integration.alert.common.persistence.accessor.ProcessingAuditAccessor;
 import com.synopsys.integration.alert.common.rest.model.AlertNotificationModel;
 import com.synopsys.integration.alert.common.rest.proxy.ProxyManager;
 import com.synopsys.integration.alert.descriptor.api.BlackDuckProviderKey;
+import com.synopsys.integration.alert.descriptor.api.model.ChannelKeys;
 import com.synopsys.integration.alert.processor.api.detail.NotificationDetailExtractionDelegator;
 import com.synopsys.integration.alert.processor.api.digest.ProjectMessageDigester;
 import com.synopsys.integration.alert.processor.api.distribute.ProcessedNotificationDetails;
@@ -58,58 +62,51 @@ public class JobNotificationProcessorTest {
     private static final Gson GSON = new GsonBuilder().create();
     private static final BlackDuckResponseResolver RESPONSE_RESOLVER = new BlackDuckResponseResolver(GSON);
 
-    private static final ProviderDetails PROVIDER_DETAILS = new ProviderDetails(0L, new LinkableItem("Black Duck", "bd-server", "https://bd-server"));
+    private static final ProviderDetails PROVIDER_DETAILS = new ProviderDetails(15L, new LinkableItem("Black Duck", "bd-server", "https://bd-server"));
     private static final LinkableItem COMPONENT = new LinkableItem("Component", "BOM component name");
     private static final LinkableItem COMPONENT_VERSION = new LinkableItem("Component Version", "0.8.7");
     private static final String COMPONENT_VERSION_URL = "http://componentVersionUrl";
     private static final String LICENSE_DISPLAY = "licenseDisplay";
-    /*
-    TODO:
-         Create a JobNotificationProcessor with all of its requirements
-         Call processNotificationForJob passing in the ProcessedNotificationDetails
-         Create a Mocked version of ProcessingAuditAccessor
-            Create helper methods to get results from the accessor
-         When ProviderMessageDistributor distributes the message, verify eventManager.sendEvent is called (?)
-         User helper methods of MockProcessingAuditAccessor to perform assertions and validation.
-     */
+    private static final String CHANNEL_KEY = ChannelKeys.SLACK.getUniversalKey();
+
+    private final UUID uuid = UUID.randomUUID();
+    private final Long notificationId = 123L;
 
     @Test
     public void processNotificationForJobTest() throws IntegrationException {
-        //notificationDetailExtracctionDelegator requirements
+        // Set up dependencies for JobNotificationProcessor
         RuleViolationNotificationDetailExtractor ruleViolationNotificationDetailExtractor = new RuleViolationNotificationDetailExtractor();
         NotificationDetailExtractionDelegator notificationDetailExtractionDelegator = new NotificationDetailExtractionDelegator(RESPONSE_RESOLVER, List.of(ruleViolationNotificationDetailExtractor));
 
-        //NotificationContentProcessor requirements
-        //TODO: What type of message extractor do we want to use here? Must extend ProviderMessageExtractor
-        //VulnerabilityNotificationMessageExtractor vulnerabilityNotificationMessageExtractor = new VulnerabilityNotificationMessageExtractor();
         RuleViolationNotificationMessageExtractor ruleViolationNotificationMessageExtractor = createRuleViolationNotificationMessageExtractor();
         ProviderMessageExtractionDelegator providerMessageExtractionDelegator = new ProviderMessageExtractionDelegator(List.of(ruleViolationNotificationMessageExtractor));
         ProjectMessageDigester projectMessageDigester = new ProjectMessageDigester();
         ProjectMessageSummarizer projectMessageSummarizer = new ProjectMessageSummarizer();
         NotificationContentProcessor notificationContentProcessor = new NotificationContentProcessor(providerMessageExtractionDelegator, projectMessageDigester, projectMessageSummarizer);
 
-        //ProviderMessageDistributor requirements
-        ProcessingAuditAccessor processingAuditAccessor = new MockProcessingAuditAccessor();
-        //TODO: In EventManagerTest JmsTemplate is mocked we call Mockito.doNothing for (jmsTemplate).convertAndSend
-        //JmsTemplate jmsTemplate = Mockito.mock(JmsTemplate.class);
-        //EventManager eventManager = new EventManager(GSON, jmsTemplate);
-        //TODO: JmsTemplate is not availible in api-processor. Investigate further by mocking EventManager instead
+        MockProcessingAuditAccessor processingAuditAccessor = new MockProcessingAuditAccessor();
         EventManager eventManager = Mockito.mock(EventManager.class);
         ProviderMessageDistributor providerMessageDistributor = new ProviderMessageDistributor(processingAuditAccessor, eventManager);
 
-        //lifeccycleCaches requirements
         NotificationExtractorBlackDuckServicesFactoryCache lifecycleCaches = createNotificationExtractorBlackDuckServicesFactoryCache();
 
         //Create Requirements for processNotificationForJob
-        ProcessedNotificationDetails processedNotificationDetails = new ProcessedNotificationDetails(UUID.randomUUID(), "ChannelName", "JobName");
+        ProcessedNotificationDetails processedNotificationDetails = new ProcessedNotificationDetails(uuid, CHANNEL_KEY, "JobName");
 
         RuleViolationNotificationView ruleViolationNotificationView = createRuleViolationNotificationView("TestProjectName");
         String notificationContentString = GSON.toJson(ruleViolationNotificationView);
         AlertNotificationModel notificationModel = createNotification(NotificationType.RULE_VIOLATION.name(), notificationContentString);
 
-        // Create instance of JobNotificationProcessor
+        // Run test and verify notification saved by ProcessingAuditAccessor
+
         JobNotificationProcessor jobNotificationProcessor = new JobNotificationProcessor(notificationDetailExtractionDelegator, notificationContentProcessor, providerMessageDistributor, List.of(lifecycleCaches));
         jobNotificationProcessor.processNotificationForJob(processedNotificationDetails, ProcessingType.DEFAULT, List.of(notificationModel));
+
+        Set<Long> auditNotificationIds = processingAuditAccessor.getNotificationIds(uuid);
+
+        Mockito.verify(eventManager).sendEvent(Mockito.any());
+        assertEquals(1, auditNotificationIds.size());
+        assertTrue(auditNotificationIds.contains(notificationId));
     }
 
     // Helper Methods
@@ -147,7 +144,6 @@ public class JobNotificationProcessorTest {
         ProxyManager proxyManager = Mockito.mock(ProxyManager.class);
         BlackDuckPropertiesFactory blackDuckPropertiesFactory = new BlackDuckPropertiesFactory(configurationAccessor, GSON, properties, proxyManager);
 
-        //Mockito.when(configurationAccessor.getConfigurationById(Mockito.eq(blackDuckConfigId))).thenReturn(Optional.of(configurationModel));
         return new NotificationExtractorBlackDuckServicesFactoryCache(blackDuckPropertiesFactory);
     }
 
