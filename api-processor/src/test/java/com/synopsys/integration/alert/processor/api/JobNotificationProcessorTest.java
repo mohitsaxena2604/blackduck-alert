@@ -104,7 +104,7 @@ public class JobNotificationProcessorTest {
 
         Set<Long> auditNotificationIds = processingAuditAccessor.getNotificationIds(uuid);
 
-        Mockito.verify(eventManager).sendEvent(Mockito.any());
+        Mockito.verify(eventManager, Mockito.times(1)).sendEvent(Mockito.any());
         assertEquals(1, auditNotificationIds.size());
         assertTrue(auditNotificationIds.contains(notificationId));
     }
