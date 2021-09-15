@@ -39,13 +39,17 @@ public interface NotificationAccessor {
 
     void deleteNotification(AlertNotificationModel notification);
 
-    AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForPurge(OffsetDateTime date, int pageSize);
+    boolean existsNotificationsToMarkForRemoval(OffsetDateTime date);
 
-    AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToPurge(int pageSize);
+    AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForRemoval(OffsetDateTime date, int pageSize);
 
-    int updateNotificationsToPurge(List<AlertNotificationModel> notifications);
+    AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToRemove(int pageSize);
 
-    int updateNotificationsToPurgeById(Set<Long> notificationIds);
+    boolean existsNotificationsToRemove();
+
+    int markNotificationsToRemove(List<AlertNotificationModel> notifications);
+
+    int markNotificationsToRemoveById(Set<Long> notificationIds);
 
     int deleteNotifications(List<AlertNotificationModel> notifications);
 

@@ -88,12 +88,16 @@ public interface NotificationContentRepository extends JpaRepository<Notificatio
     @Query("SELECT entity FROM NotificationEntity entity WHERE entity.createdAt < ?1 ORDER BY created_at, provider_creation_time asc")
     Page<NotificationEntity> findByCreatedAtBefore(OffsetDateTime date, Pageable pageable);
 
+    boolean existsNotificationEntitiesByRemoveFalseAndCreatedAtBefore(OffsetDateTime date);
+
     @Query("SELECT entity FROM NotificationEntity entity"
                + " WHERE entity.createdAt < ?1"
                + " AND entity.remove = false"
                + " ORDER BY created_at, provider_creation_time asc"
     )
     Page<NotificationEntity> findByCreatedAtBeforeAndRemoveFalse(OffsetDateTime date, Pageable pageable);
+
+    boolean existsNotificationEntitiesByRemoveIsTrue();
 
     Page<NotificationEntity> findByRemoveTrueOrderByCreatedAtAsc(Pageable pageable);
 

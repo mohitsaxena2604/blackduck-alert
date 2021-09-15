@@ -180,7 +180,12 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     }
 
     @Override
-    public AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForPurge(OffsetDateTime date, int pageSize) {
+    public boolean existsNotificationsToMarkForRemoval(OffsetDateTime date) {
+        return notificationContentRepository.existsNotificationEntitiesByRemoveFalseAndCreatedAtBefore(date);
+    }
+
+    @Override
+    public AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForRemoval(OffsetDateTime date, int pageSize) {
         int currentPage = 0;
         PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
         Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByCreatedAtBeforeAndRemoveFalse(date, pageRequest)
@@ -190,7 +195,12 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     }
 
     @Override
-    public AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToPurge(int pageSize) {
+    public boolean existsNotificationsToRemove() {
+        return notificationContentRepository.existsNotificationEntitiesByRemoveIsTrue();
+    }
+
+    @Override
+    public AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToRemove(int pageSize) {
         int currentPage = 0;
         PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
         Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByRemoveTrueOrderByCreatedAtAsc(pageRequest)
@@ -200,17 +210,17 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     }
 
     @Override
-    public int updateNotificationsToPurge(List<AlertNotificationModel> notifications) {
+    public int markNotificationsToRemove(List<AlertNotificationModel> notifications) {
         Set<Long> notificationIds = notifications
             .stream()
             .map(AlertNotificationModel::getId)
             .collect(Collectors.toSet());
-        return updateNotificationsToPurgeById(notificationIds);
+        return markNotificationsToRemoveById(notificationIds);
     }
 
     @Override
     @Transactional
-    public int updateNotificationsToPurgeById(Set<Long> notificationIds) {
+    public int markNotificationsToRemoveById(Set<Long> notificationIds) {
         return notificationContentRepository.setRemoveByIds(notificationIds);
     }
 

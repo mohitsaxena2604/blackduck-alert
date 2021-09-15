@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import com.synopsys.integration.alert.api.task.StartupScheduledTask;
 import com.synopsys.integration.alert.api.task.TaskManager;
@@ -107,16 +106,17 @@ public class PurgeTask extends StartupScheduledTask {
             logger.info("Start marking notifications for purge created earlier than {}...", date);
             int numPagesForPurge = 0;
             int totalMarked = 0;
-            AlertPagedModel<AlertNotificationModel> pageOfAlertNotificationModels = notificationAccessor.findFirstPageOfNotificationsToMarkForPurge(date, PAGE_SIZE);
-            while (!CollectionUtils.isEmpty(pageOfAlertNotificationModels.getModels())) {
+            AlertPagedModel<AlertNotificationModel> pageOfAlertNotificationModels;
+            while (notificationAccessor.existsNotificationsToMarkForRemoval(date)) {
+                pageOfAlertNotificationModels = notificationAccessor.findFirstPageOfNotificationsToMarkForRemoval(date, PAGE_SIZE);
                 List<AlertNotificationModel> notifications = pageOfAlertNotificationModels.getModels();
-                totalMarked += notificationAccessor.updateNotificationsToPurge(notifications);
+                totalMarked += notificationAccessor.markNotificationsToRemove(notifications);
                 numPagesForPurge++;
-                pageOfAlertNotificationModels = notificationAccessor.findFirstPageOfNotificationsToMarkForPurge(date, PAGE_SIZE);
                 logger.trace("Mark for purge page: {}. New pages found: {}",
                     numPagesForPurge,
                     pageOfAlertNotificationModels.getTotalPages());
             }
+
             logger.info("Marked {} notifications for purge", totalMarked);
             logger.info("Finished marking notifications for purge created earlier than {}...", date);
 

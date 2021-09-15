@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import com.synopsys.integration.alert.api.event.AlertEventHandler;
 import com.synopsys.integration.alert.api.event.NotificationPurgeEvent;
@@ -40,12 +39,12 @@ public class NotificationRemovalEventHandler implements AlertEventHandler<Notifi
 
         int numPages = 0;
         int totalRemoved = 0;
-        AlertPagedModel<AlertNotificationModel> pageOfAlertNotificationModels = notificationAccessor.getFirstPageOfNotificationsToPurge(PAGE_SIZE);
-        while (!CollectionUtils.isEmpty(pageOfAlertNotificationModels.getModels())) {
+        AlertPagedModel<AlertNotificationModel> pageOfAlertNotificationModels;
+        while (notificationAccessor.existsNotificationsToRemove()) {
+            pageOfAlertNotificationModels = notificationAccessor.getFirstPageOfNotificationsToRemove(PAGE_SIZE);
             List<AlertNotificationModel> notifications = pageOfAlertNotificationModels.getModels();
-            logger.info("Starting to process {} notifications.", notifications.size());
+            logger.info("Starting to remove {} notifications.", notifications.size());
             numPages++;
-            pageOfAlertNotificationModels = notificationAccessor.getFirstPageOfNotificationsToPurge(PAGE_SIZE);
             totalRemoved += notificationAccessor.deleteNotifications(notifications);
             logger.trace("Removal Page: {}. New pages found: {}",
                 numPages,
@@ -53,6 +52,6 @@ public class NotificationRemovalEventHandler implements AlertEventHandler<Notifi
         }
         logger.info("Purge event {}: Removed {} notifications", event.getEventId(), totalRemoved);
         logger.info("Finished notification removal event {}.", event.getEventId());
-        notificationAccessor.getFirstPageOfNotificationsToPurge(PAGE_SIZE);
+        notificationAccessor.getFirstPageOfNotificationsToRemove(PAGE_SIZE);
     }
 }
