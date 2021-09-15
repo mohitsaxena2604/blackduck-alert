@@ -183,7 +183,7 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     public AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForPurge(OffsetDateTime date, int pageSize) {
         int currentPage = 0;
         PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
-        Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByCreatedAtBeforeAndPurgeFalse(date, pageRequest)
+        Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByCreatedAtBeforeAndRemoveFalse(date, pageRequest)
             .map(this::toModel);
         List<AlertNotificationModel> alertNotificationModels = pageOfNotifications.getContent();
         return new AlertPagedModel<>(pageOfNotifications.getTotalPages(), currentPage, pageSize, alertNotificationModels);
@@ -193,7 +193,7 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     public AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToPurge(int pageSize) {
         int currentPage = 0;
         PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
-        Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByPurgeTrueOrderByCreatedAtAsc(pageRequest)
+        Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByRemoveTrueOrderByCreatedAtAsc(pageRequest)
             .map(this::toModel);
         List<AlertNotificationModel> alertNotificationModels = pageOfNotifications.getContent();
         return new AlertPagedModel<>(pageOfNotifications.getTotalPages(), currentPage, pageSize, alertNotificationModels);
@@ -211,7 +211,7 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     @Override
     @Transactional
     public int updateNotificationsToPurgeById(Set<Long> notificationIds) {
-        return notificationContentRepository.setPurgeByIds(notificationIds);
+        return notificationContentRepository.setRemoveByIds(notificationIds);
     }
 
     @Override
