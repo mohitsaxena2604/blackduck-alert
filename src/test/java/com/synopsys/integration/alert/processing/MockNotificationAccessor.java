@@ -92,6 +92,31 @@ public class MockNotificationAccessor implements NotificationAccessor {
         return 0;
     }
 
+    @Override
+    public AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForPurge(OffsetDateTime date, int pageSize) {
+        return null;
+    }
+
+    @Override
+    public AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToPurge(int pageSize) {
+        return null;
+    }
+
+    @Override
+    public int updateNotificationsToPurge(List<AlertNotificationModel> notifications) {
+        return 0;
+    }
+
+    @Override
+    public int updateNotificationsToPurgeById(Set<Long> notificationIds) {
+        return 0;
+    }
+
+    @Override
+    public int deleteNotifications(List<AlertNotificationModel> notifications) {
+        return 0;
+    }
+
     //AlertNotificationModel is immutable, this is a workaround for the unit test to set "processed" to true.
     private AlertNotificationModel createProcessedAlertNotificationModel(AlertNotificationModel alertNotificationModel) {
         return new AlertNotificationModel(alertNotificationModel.getId(),
@@ -102,7 +127,8 @@ public class MockNotificationAccessor implements NotificationAccessor {
             alertNotificationModel.getContent(),
             alertNotificationModel.getCreatedAt(),
             alertNotificationModel.getProviderCreationTime(),
-            true);
+            true,
+            false);
     }
 
 }

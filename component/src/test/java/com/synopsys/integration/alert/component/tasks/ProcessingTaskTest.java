@@ -43,7 +43,7 @@ public class ProcessingTaskTest {
     public void initTest() throws IOException {
         String notificationJson = TestResourceUtils.readFileToString("json/projectVersionNotification.json");
         AlertNotificationModel model = new AlertNotificationModel(
-            1L, 1L, "BlackDuck", "BlackDuck_1", "PROJECT_VERSION", notificationJson, DateUtils.createCurrentDateTimestamp(), DateUtils.createCurrentDateTimestamp(), false);
+            1L, 1L, "BlackDuck", "BlackDuck_1", "PROJECT_VERSION", notificationJson, DateUtils.createCurrentDateTimestamp(), DateUtils.createCurrentDateTimestamp(), false, false);
         modelList = List.of(model);
     }
 

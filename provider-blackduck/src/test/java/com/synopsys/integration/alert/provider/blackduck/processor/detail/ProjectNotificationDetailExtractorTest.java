@@ -27,7 +27,7 @@ public class ProjectNotificationDetailExtractorTest {
         ProjectNotificationView projectNotificationView = gson.fromJson(jsonContent, ProjectNotificationView.class);
         ProjectNotificationContent projectNotificationContent = projectNotificationView.getContent();
 
-        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false);
+        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false, false);
 
         ProjectNotificationDetailExtractor extractor = new ProjectNotificationDetailExtractor();
         List<DetailedNotificationContent> detailedNotificationContents = extractor.extractDetailedContent(notification, projectNotificationView);

@@ -8,6 +8,7 @@
 package com.synopsys.integration.alert.component.scheduling.workflow;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.synopsys.integration.alert.api.task.StartupScheduledTask;
 import com.synopsys.integration.alert.api.task.TaskManager;
@@ -26,6 +28,8 @@ import com.synopsys.integration.alert.common.persistence.accessor.NotificationAc
 import com.synopsys.integration.alert.common.persistence.accessor.SystemMessageAccessor;
 import com.synopsys.integration.alert.common.persistence.model.ConfigurationFieldModel;
 import com.synopsys.integration.alert.common.persistence.model.ConfigurationModel;
+import com.synopsys.integration.alert.common.rest.model.AlertNotificationModel;
+import com.synopsys.integration.alert.common.rest.model.AlertPagedModel;
 import com.synopsys.integration.alert.common.util.DateUtils;
 import com.synopsys.integration.alert.component.scheduling.SchedulingConfiguration;
 import com.synopsys.integration.alert.component.scheduling.descriptor.SchedulingDescriptor;
@@ -36,6 +40,7 @@ public class PurgeTask extends StartupScheduledTask {
     public static final String CRON_FORMAT = "0 0 0 1/%s * ?";
     public static final int DEFAULT_FREQUENCY = 3;
     private static final int DEFAULT_DAY_OFFSET = 1;
+    private static final int PAGE_SIZE = 1000;
 
     private final Logger logger = LoggerFactory.getLogger(PurgeTask.class);
     private final SchedulingDescriptorKey schedulingDescriptorKey;
@@ -58,7 +63,8 @@ public class PurgeTask extends StartupScheduledTask {
     @Override
     public void runTask() {
         OffsetDateTime date = createNotificationOlderThanSearchDate();
-        purgeNotifications(date);
+        //purgeNotifications(date);
+        markNotificationsToPurge(date);
         purgeSystemMessages(date);
     }
 
@@ -93,6 +99,29 @@ public class PurgeTask extends StartupScheduledTask {
             logger.info("Purged {} notifications", deletedCount);
         } catch (Exception ex) {
             logger.error("Error in purging notifications", ex);
+        }
+    }
+
+    private void markNotificationsToPurge(OffsetDateTime date) {
+        try {
+            logger.info("Start marking notifications for purge created earlier than {}...", date);
+            int numPagesForPurge = 0;
+            int totalMarked = 0;
+            AlertPagedModel<AlertNotificationModel> pageOfAlertNotificationModels = notificationAccessor.findFirstPageOfNotificationsToMarkForPurge(date, PAGE_SIZE);
+            while (!CollectionUtils.isEmpty(pageOfAlertNotificationModels.getModels())) {
+                List<AlertNotificationModel> notifications = pageOfAlertNotificationModels.getModels();
+                totalMarked += notificationAccessor.updateNotificationsToPurge(notifications);
+                numPagesForPurge++;
+                pageOfAlertNotificationModels = notificationAccessor.findFirstPageOfNotificationsToMarkForPurge(date, PAGE_SIZE);
+                logger.trace("Mark for purge page: {}. New pages found: {}",
+                    numPagesForPurge,
+                    pageOfAlertNotificationModels.getTotalPages());
+            }
+            logger.info("Marked {} notifications for purge", totalMarked);
+            logger.info("Finished marking notifications for purge created earlier than {}...", date);
+
+        } catch (Exception ex) {
+            logger.error("Error marking notifications to purge", ex);
         }
     }
 

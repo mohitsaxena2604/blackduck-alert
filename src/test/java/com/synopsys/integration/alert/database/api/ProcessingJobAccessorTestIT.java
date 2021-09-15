@@ -155,6 +155,7 @@ public class ProcessingJobAccessorTestIT {
             "content",
             OffsetDateTime.now(),
             OffsetDateTime.now(),
+            false,
             false
         );
     }

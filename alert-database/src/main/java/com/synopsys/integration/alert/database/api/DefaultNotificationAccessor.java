@@ -157,8 +157,7 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     @Override
     public AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsNotProcessed(int pageSize) {
         int currentPage = 0;
-        Sort.Order sortingOrder = Sort.Order.asc("providerCreationTime");
-        PageRequest pageRequest = PageRequest.of(currentPage, pageSize, Sort.by(sortingOrder));
+        PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
         Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByProcessedFalseOrderByProviderCreationTimeAsc(pageRequest)
             .map(this::toModel);
         List<AlertNotificationModel> alertNotificationModels = pageOfNotifications.getContent();
@@ -180,6 +179,50 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
         notificationContentRepository.setProcessedByIds(notificationIds);
     }
 
+    @Override
+    public AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForPurge(OffsetDateTime date, int pageSize) {
+        int currentPage = 0;
+        PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
+        Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByCreatedAtBeforeAndPurgeFalse(date, pageRequest)
+            .map(this::toModel);
+        List<AlertNotificationModel> alertNotificationModels = pageOfNotifications.getContent();
+        return new AlertPagedModel<>(pageOfNotifications.getTotalPages(), currentPage, pageSize, alertNotificationModels);
+    }
+
+    @Override
+    public AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToPurge(int pageSize) {
+        int currentPage = 0;
+        PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
+        Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByPurgeTrueOrderByCreatedAtAsc(pageRequest)
+            .map(this::toModel);
+        List<AlertNotificationModel> alertNotificationModels = pageOfNotifications.getContent();
+        return new AlertPagedModel<>(pageOfNotifications.getTotalPages(), currentPage, pageSize, alertNotificationModels);
+    }
+
+    @Override
+    public int updateNotificationsToPurge(List<AlertNotificationModel> notifications) {
+        Set<Long> notificationIds = notifications
+            .stream()
+            .map(AlertNotificationModel::getId)
+            .collect(Collectors.toSet());
+        return updateNotificationsToPurgeById(notificationIds);
+    }
+
+    @Override
+    @Transactional
+    public int updateNotificationsToPurgeById(Set<Long> notificationIds) {
+        return notificationContentRepository.setPurgeByIds(notificationIds);
+    }
+
+    @Override
+    public int deleteNotifications(List<AlertNotificationModel> notifications) {
+        Set<Long> notificationIds = notifications
+            .stream()
+            .map(AlertNotificationModel::getId)
+            .collect(Collectors.toSet());
+        return notificationContentRepository.bulkDeleteByIds(notificationIds);
+    }
+
     private List<AlertNotificationModel> toModels(List<NotificationEntity> notificationEntities) {
         return notificationEntities
             .stream()
@@ -188,7 +231,8 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     }
 
     private NotificationEntity fromModel(AlertNotificationModel model) {
-        return new NotificationEntity(model.getId(), model.getCreatedAt(), model.getProvider(), model.getProviderConfigId(), model.getProviderCreationTime(), model.getNotificationType(), model.getContent(), model.getProcessed());
+        return new NotificationEntity(model.getId(), model.getCreatedAt(), model.getProvider(), model.getProviderConfigId(), model.getProviderCreationTime(), model.getNotificationType(), model.getContent(), model.getProcessed(),
+            model.getRemove());
     }
 
     private AlertNotificationModel toModel(NotificationEntity entity) {
@@ -208,7 +252,8 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
             entity.getContent(),
             entity.getCreatedAt(),
             entity.getProviderCreationTime(),
-            entity.getProcessed());
+            entity.getProcessed(),
+            entity.getRemove());
     }
 
 }

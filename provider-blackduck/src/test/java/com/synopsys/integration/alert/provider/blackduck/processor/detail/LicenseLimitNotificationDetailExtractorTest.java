@@ -7,11 +7,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.google.gson.Gson;
 import com.synopsys.integration.alert.common.rest.model.AlertNotificationModel;
 import com.synopsys.integration.alert.processor.api.detail.DetailedNotificationContent;
 import com.synopsys.integration.blackduck.api.manual.component.LicenseLimitNotificationContent;
-import com.synopsys.integration.blackduck.api.manual.enumeration.NotificationType;
 import com.synopsys.integration.blackduck.api.manual.view.LicenseLimitNotificationView;
 
 public class LicenseLimitNotificationDetailExtractorTest {
@@ -23,7 +21,7 @@ public class LicenseLimitNotificationDetailExtractorTest {
         LicenseLimitNotificationContent notificationContent = new LicenseLimitNotificationContent();
         notificationView.setContent(notificationContent);
 
-        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false);
+        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false, false);
 
         List<DetailedNotificationContent> detailedNotificationContents = extractor.extractDetailedContent(notification, notificationView);
         assertEquals(1, detailedNotificationContents.size());

@@ -97,7 +97,8 @@ public class NotificationReceivedEventHandlerTestIT {
             entity.getContent(),
             entity.getCreatedAt(),
             entity.getProviderCreationTime(),
-            processed
+            processed,
+            entity.getRemove()
         );
     }
 

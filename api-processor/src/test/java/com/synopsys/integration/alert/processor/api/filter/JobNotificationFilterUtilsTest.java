@@ -164,6 +164,7 @@ public class JobNotificationFilterUtilsTest {
             "content",
             OffsetDateTime.now(),
             OffsetDateTime.now(),
+            false,
             false
         );
     }

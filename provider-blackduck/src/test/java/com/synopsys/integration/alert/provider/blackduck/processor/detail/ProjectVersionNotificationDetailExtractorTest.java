@@ -27,7 +27,7 @@ public class ProjectVersionNotificationDetailExtractorTest {
         ProjectVersionNotificationView projectNotificationView = gson.fromJson(jsonContent, ProjectVersionNotificationView.class);
         ProjectVersionNotificationContent projectVersionNotificationContent = projectNotificationView.getContent();
 
-        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false);
+        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false, false);
 
         ProjectVersionNotificationDetailExtractor extractor = new ProjectVersionNotificationDetailExtractor();
         List<DetailedNotificationContent> detailedNotificationContents = extractor.extractDetailedContent(notification, projectNotificationView);

@@ -185,7 +185,8 @@ public class JmsNotificationReceiverTestIT {
             content,
             DateUtils.createCurrentDateTimestamp(),
             DateUtils.createCurrentDateTimestamp(),
-            processed);
+            processed,
+            false);
     }
 
 }

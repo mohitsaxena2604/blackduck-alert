@@ -28,7 +28,7 @@ public class RuleViolationNotificationDetailExtractorTest {
         RuleViolationNotificationView notificationView = gson.fromJson(jsonContent, RuleViolationNotificationView.class);
         RuleViolationNotificationContent notificationContent = notificationView.getContent();
 
-        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false);
+        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false, false);
 
         RuleViolationNotificationDetailExtractor extractor = new RuleViolationNotificationDetailExtractor();
         List<DetailedNotificationContent> detailedNotificationContents = extractor.extractDetailedContent(notification, notificationView);

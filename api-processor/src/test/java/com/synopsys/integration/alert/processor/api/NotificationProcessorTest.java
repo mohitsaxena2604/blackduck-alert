@@ -124,6 +124,7 @@ public class NotificationProcessorTest {
             notificationContent,
             OffsetDateTime.now(),
             OffsetDateTime.now(),
+            false,
             false
         );
     }

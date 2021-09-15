@@ -52,7 +52,7 @@ public class NotificationReceivedEventHandlerTest {
         String providerConfigName = "providerConfigName";
 
         return new AlertNotificationModel(id, providerConfigId, provider, providerConfigName, notificationType, content, DateUtils.createCurrentDateTimestamp(),
-            DateUtils.createCurrentDateTimestamp(), processed);
+            DateUtils.createCurrentDateTimestamp(), processed, false);
     }
 
     private NotificationProcessor mockNotificationProcessor(List<AlertNotificationModel> alertNotificationModels) {

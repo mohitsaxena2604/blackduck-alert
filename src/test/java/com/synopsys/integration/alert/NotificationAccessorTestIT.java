@@ -401,7 +401,7 @@ public class NotificationAccessorTestIT {
     }
 
     private AlertNotificationModel createNotificationModel(OffsetDateTime createdAt) {
-        return new AlertNotificationModel(1L, providerConfigModel.getConfigurationId(), "provider", "providerConfigName", NOTIFICATION_TYPE, "{content: \"content is here...\"}", createdAt, createdAt, false);
+        return new AlertNotificationModel(1L, providerConfigModel.getConfigurationId(), "provider", "providerConfigName", NOTIFICATION_TYPE, "{content: \"content is here...\"}", createdAt, createdAt, false, false);
     }
 
     private AlertNotificationModel createNotificationModel() {

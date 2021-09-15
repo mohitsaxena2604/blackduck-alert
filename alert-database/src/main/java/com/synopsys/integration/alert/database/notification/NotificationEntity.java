@@ -46,6 +46,8 @@ public class NotificationEntity extends BaseEntity implements DatabaseEntity {
     private String content;
     @Column(name = "processed")
     private boolean processed;
+    @Column(name = "remove")
+    private boolean remove;
 
     @OneToMany(mappedBy = "notificationContent")
     private final List<AuditNotificationRelation> auditNotificationRelations = new ArrayList<>();
@@ -55,7 +57,7 @@ public class NotificationEntity extends BaseEntity implements DatabaseEntity {
     }
 
     // Reserved for queries
-    public NotificationEntity(Long id, OffsetDateTime createdAt, String provider, Long providerConfigId, OffsetDateTime providerCreationTime, String notificationType, String content, boolean processed) {
+    public NotificationEntity(Long id, OffsetDateTime createdAt, String provider, Long providerConfigId, OffsetDateTime providerCreationTime, String notificationType, String content, boolean processed, boolean remove) {
         this.setId(id);
         this.createdAt = createdAt;
         this.provider = provider;
@@ -64,9 +66,10 @@ public class NotificationEntity extends BaseEntity implements DatabaseEntity {
         this.notificationType = notificationType;
         this.content = content;
         this.processed = processed;
+        this.remove = remove;
     }
 
-    public NotificationEntity(OffsetDateTime createdAt, String provider, Long providerConfigId, OffsetDateTime providerCreationTime, String notificationType, String content, boolean processed) {
+    public NotificationEntity(OffsetDateTime createdAt, String provider, Long providerConfigId, OffsetDateTime providerCreationTime, String notificationType, String content, boolean processed, boolean remove) {
         this.createdAt = createdAt;
         this.provider = provider;
         this.providerConfigId = providerConfigId;
@@ -74,6 +77,7 @@ public class NotificationEntity extends BaseEntity implements DatabaseEntity {
         this.notificationType = notificationType;
         this.content = content;
         this.processed = processed;
+        this.remove = remove;
     }
 
     @Override
@@ -112,6 +116,10 @@ public class NotificationEntity extends BaseEntity implements DatabaseEntity {
 
     public boolean getProcessed() {
         return processed;
+    }
+
+    public boolean getRemove() {
+        return remove;
     }
 
     public void setProcessedToTrue() {

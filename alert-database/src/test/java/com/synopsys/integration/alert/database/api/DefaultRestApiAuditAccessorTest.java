@@ -140,9 +140,9 @@ public class DefaultRestApiAuditAccessorTest {
 
         //At least two AlertNotificationModel are required for the comparator
         AlertNotificationModel alertNotificationModel = new AlertNotificationModel(1L, 1L, "provider-test", "providerConfigName-test", "notificationType-test", "{content: \"content is here...\"}", DateUtils.createCurrentDateTimestamp(),
-            DateUtils.createCurrentDateTimestamp(), false);
+            DateUtils.createCurrentDateTimestamp(), false, false);
         AlertNotificationModel alertNotificationModel2 = new AlertNotificationModel(2L, 2L, "provider-test2", "providerConfigName-test2", "notificationType-test2", "{content: \"content is here2..\"}",
-            DateUtils.createCurrentDateTimestamp().minusSeconds(15), DateUtils.createCurrentDateTimestamp().minusSeconds(10), false);
+            DateUtils.createCurrentDateTimestamp().minusSeconds(15), DateUtils.createCurrentDateTimestamp().minusSeconds(10), false, false);
 
         Pageable auditPageable = Mockito.mock(Pageable.class);
         Mockito.when(auditPageable.getOffset()).thenReturn(pageNumber.longValue());
@@ -195,7 +195,7 @@ public class DefaultRestApiAuditAccessorTest {
         ContentConverter contentConverter = new ContentConverter(new DefaultConversionService());
 
         AlertNotificationModel alertNotificationModel = new AlertNotificationModel(id, providerConfigId, provider, providerConfigName, notificationType, content, DateUtils.createCurrentDateTimestamp(),
-            DateUtils.createCurrentDateTimestamp(), false);
+            DateUtils.createCurrentDateTimestamp(), false, false);
         AuditNotificationRelation auditNotificationRelation = new AuditNotificationRelation(auditEntryId, alertNotificationModel.getId());
         AuditEntryEntity auditEntryEntity = new AuditEntryEntity(UUID.randomUUID(), timeCreated, timeLastSent, AuditEntryStatus.SUCCESS.name(), null, null);
 

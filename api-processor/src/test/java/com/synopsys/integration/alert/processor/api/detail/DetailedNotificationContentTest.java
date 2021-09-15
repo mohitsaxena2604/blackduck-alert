@@ -16,7 +16,7 @@ import com.synopsys.integration.blackduck.api.manual.component.VulnerabilityNoti
 
 public class DetailedNotificationContentTest {
     private static final String EXPECTED_NO_POLICY = "Expected no policy name";
-    private static final AlertNotificationModel ALERT_NOTIFICATION_MODEL = new AlertNotificationModel(25L, 123L, null, null, null, null, null, null, false);
+    private static final AlertNotificationModel ALERT_NOTIFICATION_MODEL = new AlertNotificationModel(25L, 123L, null, null, null, null, null, null, false, false);
 
     @Test
     public void vulnerabilityTest() {

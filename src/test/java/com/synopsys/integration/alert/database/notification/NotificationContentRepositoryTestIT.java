@@ -100,6 +100,7 @@ public class NotificationContentRepositoryTestIT {
             providerCreationTime,
             NotificationType.VULNERABILITY.name(),
             "{\"content\": {}}",
+            false,
             false
         );
     }

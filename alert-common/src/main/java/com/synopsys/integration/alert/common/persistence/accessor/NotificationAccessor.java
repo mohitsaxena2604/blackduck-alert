@@ -39,4 +39,14 @@ public interface NotificationAccessor {
 
     void deleteNotification(AlertNotificationModel notification);
 
+    AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForPurge(OffsetDateTime date, int pageSize);
+
+    AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToPurge(int pageSize);
+
+    int updateNotificationsToPurge(List<AlertNotificationModel> notifications);
+
+    int updateNotificationsToPurgeById(Set<Long> notificationIds);
+
+    int deleteNotifications(List<AlertNotificationModel> notifications);
+
 }

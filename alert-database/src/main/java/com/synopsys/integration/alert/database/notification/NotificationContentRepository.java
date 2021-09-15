@@ -78,4 +78,28 @@ public interface NotificationContentRepository extends JpaRepository<Notificatio
     @Modifying
     int bulkDeleteCreatedAtBefore(@Param("date") OffsetDateTime date);
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE NotificationEntity entity "
+               + "SET entity.purge = true "
+               + "WHERE entity.id IN :notificationIds"
+    )
+    int setPurgeByIds(@Param("notificationIds") Set<Long> notificationIds);
+
+    @Query("SELECT entity FROM NotificationEntity entity WHERE entity.createdAt < ?1 ORDER BY created_at, provider_creation_time asc")
+    Page<NotificationEntity> findByCreatedAtBefore(OffsetDateTime date, Pageable pageable);
+
+    @Query("SELECT entity FROM NotificationEntity entity"
+               + " WHERE entity.createdAt < ?1"
+               + " AND purge = false"
+               + " ORDER BY created_at, provider_creation_time asc"
+    )
+    Page<NotificationEntity> findByCreatedAtBeforeAndPurgeFalse(OffsetDateTime date, Pageable pageable);
+
+    Page<NotificationEntity> findByPurgeTrueOrderByCreatedAtAsc(Pageable pageable);
+
+    @Modifying
+    @Query("DELETE FROM NotificationEntity notification"
+               + " WHERE notification.id IN :notificationIds"
+    )
+    int bulkDeleteByIds(@Param("notificationIds") Set<Long> notificationIds);
 }

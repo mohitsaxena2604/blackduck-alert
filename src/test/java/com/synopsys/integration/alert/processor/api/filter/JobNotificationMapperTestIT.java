@@ -382,6 +382,7 @@ public class JobNotificationMapperTestIT {
             "content",
             OffsetDateTime.now(),
             OffsetDateTime.now(),
+            false,
             false
         );
     }

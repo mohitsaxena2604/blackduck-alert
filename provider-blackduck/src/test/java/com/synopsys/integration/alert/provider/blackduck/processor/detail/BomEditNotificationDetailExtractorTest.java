@@ -41,7 +41,7 @@ public class BomEditNotificationDetailExtractorTest {
         NotificationExtractorBlackDuckServicesFactoryCache cache = createCache(blackDuckConfigId, projectName, projectVersionName);
         BomEditNotificationDetailExtractor extractor = new BomEditNotificationDetailExtractor(cache);
 
-        AlertNotificationModel notification = new AlertNotificationModel(0L, blackDuckConfigId, "BlackDuck", "Config 1", null, null, null, null, false);
+        AlertNotificationModel notification = new AlertNotificationModel(0L, blackDuckConfigId, "BlackDuck", "Config 1", null, null, null, null, false, false);
 
         List<DetailedNotificationContent> detailedNotificationContents = extractor.extractDetailedContent(notification, notificationView);
         assertEquals(1, detailedNotificationContents.size());
@@ -68,7 +68,7 @@ public class BomEditNotificationDetailExtractorTest {
 
         BomEditNotificationDetailExtractor extractor = new BomEditNotificationDetailExtractor(cache);
 
-        AlertNotificationModel notification = new AlertNotificationModel(0L, blackDuckConfigId, "BlackDuck", "Config 1", null, null, null, null, false);
+        AlertNotificationModel notification = new AlertNotificationModel(0L, blackDuckConfigId, "BlackDuck", "Config 1", null, null, null, null, false, false);
 
         List<DetailedNotificationContent> detailedNotificationContents = extractor.extractDetailedContent(notification, notificationView);
 

@@ -48,7 +48,7 @@ public class NotificationDetailExtractionDelegatorTest {
 
     private static AlertNotificationModel createAlertNotification() {
         String pvnJson = GSON.toJson(PVN_VIEW);
-        return new AlertNotificationModel(RANDOM.nextLong(), RANDOM.nextLong(), "provider_blackduck", "provider-config", PVN_VIEW.getType().name(), pvnJson, OffsetDateTime.now(), OffsetDateTime.now().minusHours(1L), false);
+        return new AlertNotificationModel(RANDOM.nextLong(), RANDOM.nextLong(), "provider_blackduck", "provider-config", PVN_VIEW.getType().name(), pvnJson, OffsetDateTime.now(), OffsetDateTime.now().minusHours(1L), false, false);
     }
 
     private static ProjectVersionNotificationView createProjectVersionNotificationView() {

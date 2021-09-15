@@ -37,7 +37,7 @@ public class LicenseLimitNotificationMessageExtractorTest {
 
     private NotificationContentWrapper createNotificationContentWrapper(LicenseLimitNotificationContent notificationContentComponent) {
         AlertNotificationModel alertNotificationModel = new AlertNotificationModel(1L, 1L, "provider-test", "providerConfigName-test", "notificationType-test", "{content: \"content is here...\"}", DateUtils.createCurrentDateTimestamp(),
-            DateUtils.createCurrentDateTimestamp(), false);
+            DateUtils.createCurrentDateTimestamp(), false, false);
         return new NotificationContentWrapper(alertNotificationModel, notificationContentComponent, LicenseLimitNotificationContent.class);
     }
 

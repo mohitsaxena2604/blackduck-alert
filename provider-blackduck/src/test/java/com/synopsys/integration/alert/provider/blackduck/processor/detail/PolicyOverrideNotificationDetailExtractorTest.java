@@ -30,7 +30,7 @@ public class PolicyOverrideNotificationDetailExtractorTest {
         PolicyOverrideNotificationView notificationView = gson.fromJson(notificationString, PolicyOverrideNotificationView.class);
         PolicyOverrideNotificationContent notificationContent = notificationView.getContent();
 
-        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false);
+        AlertNotificationModel notification = new AlertNotificationModel(0L, 0L, "BlackDuck", "Config 1", null, null, null, null, false, false);
 
         PolicyOverrideNotificationDetailExtractor extractor = new PolicyOverrideNotificationDetailExtractor();
         List<DetailedNotificationContent> detailedNotificationContents = extractor.extractDetailedContent(notification, notificationView);
