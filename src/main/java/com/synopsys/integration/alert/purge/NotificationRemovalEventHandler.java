@@ -15,13 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.alert.api.event.AlertEventHandler;
-import com.synopsys.integration.alert.api.event.NotificationPurgeEvent;
+import com.synopsys.integration.alert.api.event.NotificationRemovalEvent;
 import com.synopsys.integration.alert.common.persistence.accessor.NotificationAccessor;
 import com.synopsys.integration.alert.common.rest.model.AlertNotificationModel;
 import com.synopsys.integration.alert.common.rest.model.AlertPagedModel;
 
 @Component
-public class NotificationRemovalEventHandler implements AlertEventHandler<NotificationPurgeEvent> {
+public class NotificationRemovalEventHandler implements AlertEventHandler<NotificationRemovalEvent> {
     private static final int PAGE_SIZE = 1000;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -33,7 +33,7 @@ public class NotificationRemovalEventHandler implements AlertEventHandler<Notifi
     }
 
     @Override
-    public void handle(NotificationPurgeEvent event) {
+    public void handle(NotificationRemovalEvent event) {
         logger.debug("Event {}", event);
         logger.info("Start notification removal event {}.", event.getEventId());
 

@@ -7,10 +7,10 @@
  */
 package com.synopsys.integration.alert.api.event;
 
-public class NotificationPurgeEvent extends AlertEvent {
+public class NotificationRemovalEvent extends AlertEvent {
     public static final String NOTIFICATION_PURGE_EVENT_TYPE = "notification_purge_event";
 
-    public NotificationPurgeEvent() {
+    public NotificationRemovalEvent() {
         super(NOTIFICATION_PURGE_EVENT_TYPE);
     }
 

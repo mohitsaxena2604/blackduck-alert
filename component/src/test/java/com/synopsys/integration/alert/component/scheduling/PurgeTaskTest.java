@@ -27,7 +27,7 @@ public class PurgeTaskTest {
         configurationFieldModel.setFieldValue(notDefaultValue);
         configurationModel.put(configurationFieldModel);
         Mockito.when(configurationAccessor.getConfigurationsByDescriptorKey(Mockito.any(DescriptorKey.class))).thenReturn(List.of(configurationModel));
-        PurgeTask task = new PurgeTask(new SchedulingDescriptorKey(), null, null, null, null, configurationAccessor);
+        PurgeTask task = new PurgeTask(new SchedulingDescriptorKey(), null, null, null, null, configurationAccessor, null);
         String cronWithNotDefault = task.scheduleCronExpression();
         String expectedCron = String.format(PurgeTask.CRON_FORMAT, notDefaultValue);
 

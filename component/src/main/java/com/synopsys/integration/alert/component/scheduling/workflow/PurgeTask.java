@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
+import com.synopsys.integration.alert.api.event.EventManager;
+import com.synopsys.integration.alert.api.event.NotificationRemovalEvent;
 import com.synopsys.integration.alert.api.task.StartupScheduledTask;
 import com.synopsys.integration.alert.api.task.TaskManager;
 import com.synopsys.integration.alert.common.enumeration.ConfigContextEnum;
@@ -46,16 +48,18 @@ public class PurgeTask extends StartupScheduledTask {
     private final NotificationAccessor notificationAccessor;
     private final SystemMessageAccessor systemMessageAccessor;
     private final ConfigurationAccessor configurationAccessor;
+    private final EventManager eventManager;
     private int dayOffset;
 
     @Autowired
     public PurgeTask(SchedulingDescriptorKey schedulingDescriptorKey, TaskScheduler taskScheduler, NotificationAccessor notificationAccessor, SystemMessageAccessor systemMessageAccessor, TaskManager taskManager,
-        ConfigurationAccessor configurationAccessor) {
+        ConfigurationAccessor configurationAccessor, EventManager eventManager) {
         super(taskScheduler, taskManager);
         this.schedulingDescriptorKey = schedulingDescriptorKey;
         this.notificationAccessor = notificationAccessor;
         this.systemMessageAccessor = systemMessageAccessor;
         this.configurationAccessor = configurationAccessor;
+        this.eventManager = eventManager;
         this.dayOffset = 1;
     }
 
@@ -116,9 +120,13 @@ public class PurgeTask extends StartupScheduledTask {
                     numPagesForPurge,
                     pageOfAlertNotificationModels.getTotalPages());
             }
-
+            boolean notificationsToPurge = notificationAccessor.existsNotificationsToRemove();
             logger.info("Marked {} notifications for purge", totalMarked);
+            logger.info("Notifications to remove from database: {}", notificationsToPurge);
             logger.info("Finished marking notifications for purge created earlier than {}...", date);
+            if (notificationsToPurge) {
+                eventManager.sendEvent(new NotificationRemovalEvent());
+            }
 
         } catch (Exception ex) {
             logger.error("Error marking notifications to purge", ex);
