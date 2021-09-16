@@ -94,8 +94,7 @@ public class NotificationRemovalTest {
         if (purgeTask != null) {
             taskManager.unregisterTask(purgeTask.getTaskName());
         }
-
-        notificationAccessor.deleteNotifications(notificationAccessor.getFirstPageOfNotificationsToRemove(BATCH_SIZE * 2).getModels());
+        notificationAccessor.deleteNotificationsCreatedBefore(OffsetDateTime.now());
 
         if (providerConfig != null) {
             configurationAccessor.deleteConfiguration(providerConfig.getConfigurationId());
