@@ -55,6 +55,7 @@ import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.log.Slf4jIntLogger;
 import com.synopsys.integration.wait.WaitJob;
+import com.synopsys.integration.wait.WaitJobCondition;
 import com.synopsys.integration.wait.WaitJobConfig;
 
 @Tag(TestTags.DEFAULT_PERFORMANCE)
@@ -107,20 +108,28 @@ public class NotificationRemovalTest {
     public void testDeletion() throws IntegrationException, InterruptedException {
         providerConfig = createBlackDuckConfiguration();
         OffsetDateTime testStartTime = OffsetDateTime.now();
-        createABatchOfNotifications(providerConfig, testStartTime, true);
+        OffsetDateTime notificationCreatedAtTime = OffsetDateTime.now();
         // create 1000 processed notifications not for removal
+        createABatchOfNotifications(providerConfig, testStartTime, true);
         // create 9000 for removal with varying dates and processed flags
         for (int index = 0; index < 9; index++) {
             boolean processed = index % 2 == 0 ? true : false;
-            createABatchOfNotifications(providerConfig, testStartTime.minusMonths(index + 1), processed);
+            // update the createdAt time to be 1 month older
+            notificationCreatedAtTime = notificationCreatedAtTime.minusMonths(1);
+            createABatchOfNotifications(providerConfig, notificationCreatedAtTime, processed);
         }
+        OffsetDateTime oldestNotificationCreationTime = notificationCreatedAtTime;
         purgeTask = new PurgeTask(schedulingDescriptorKey, taskScheduler, notificationAccessor, systemMessageAccessor, taskManager, configurationAccessor, eventManager);
         LocalDateTime startTime = LocalDateTime.now();
-        WaitJob<Boolean> waitJob = createWaitJob(startTime);
+        WaitJob<Boolean> waitJob = createWaitJob(startTime, () -> {
+            List<AlertNotificationModel> notificationsInDatabase = notificationAccessor.findByCreatedAtBetween(oldestNotificationCreationTime, testStartTime);
+            return notificationsInDatabase.size() == BATCH_SIZE && notificationsInDatabase.stream()
+                .allMatch(AlertNotificationModel::getProcessed);
+        });
         purgeTask.runTask();
         boolean isComplete = waitJob.waitFor();
         logTimeElapsedWithMessage("Purge of notifications duration: %s", startTime, LocalDateTime.now());
-        List<AlertNotificationModel> remainingNotifications = notificationAccessor.findByCreatedAtBetween(testStartTime, OffsetDateTime.now());
+        List<AlertNotificationModel> remainingNotifications = notificationAccessor.findByCreatedAtBetween(oldestNotificationCreationTime, testStartTime);
 
         assertTrue(isComplete);
         assertEquals(BATCH_SIZE, remainingNotifications.size());
@@ -138,9 +147,9 @@ public class NotificationRemovalTest {
         LOGGER.info(String.format("Current time %s.", dateTimeFormatter.format(end)));
     }
 
-    private WaitJob<Boolean> createWaitJob(LocalDateTime startTime) {
-        WaitJobConfig waitJobConfig = new WaitJobConfig(LOGGER, "int performance test runner notification wait", 600, startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), 20);
-        return WaitJob.createSimpleWait(waitJobConfig, () -> !notificationAccessor.existsNotificationsToRemove());
+    private WaitJob<Boolean> createWaitJob(LocalDateTime startTime, WaitJobCondition waitCondition) {
+        WaitJobConfig waitJobConfig = new WaitJobConfig(LOGGER, "int performance test runner notification wait", 600, startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), 1);
+        return WaitJob.createSimpleWait(waitJobConfig, waitCondition);
     }
 
     private void createABatchOfNotifications(ConfigurationModel providerConfig, OffsetDateTime notificationCreationTime, boolean batchOfProcessedNotifications) {
