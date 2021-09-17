@@ -47,10 +47,10 @@ public interface NotificationAccessor {
 
     boolean existsNotificationsToRemove();
 
+    int deleteNotificationsForRemoval(int pageSize);
+
     int markNotificationsToRemove(List<AlertNotificationModel> notifications);
 
     int markNotificationsToRemoveById(Set<Long> notificationIds);
-
-    int deleteNotifications(List<AlertNotificationModel> notifications);
 
 }

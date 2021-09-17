@@ -223,14 +223,10 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     public int markNotificationsToRemoveById(Set<Long> notificationIds) {
         return notificationContentRepository.setRemoveByIds(notificationIds);
     }
-
+    
     @Override
-    public int deleteNotifications(List<AlertNotificationModel> notifications) {
-        Set<Long> notificationIds = notifications
-            .stream()
-            .map(AlertNotificationModel::getId)
-            .collect(Collectors.toSet());
-        return notificationContentRepository.bulkDeleteByIds(notificationIds);
+    public int deleteNotificationsForRemoval(int pageSize) {
+        return notificationContentRepository.bulkDeleteByRemoveTrue(pageSize);
     }
 
     private List<AlertNotificationModel> toModels(List<NotificationEntity> notificationEntities) {
