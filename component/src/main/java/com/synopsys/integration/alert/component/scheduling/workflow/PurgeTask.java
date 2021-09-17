@@ -8,7 +8,6 @@
 package com.synopsys.integration.alert.component.scheduling.workflow;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -41,7 +40,7 @@ public class PurgeTask extends StartupScheduledTask {
     public static final String CRON_FORMAT = "0 0 0 1/%s * ?";
     public static final int DEFAULT_FREQUENCY = 3;
     private static final int DEFAULT_DAY_OFFSET = 1;
-    private static final int PAGE_SIZE = 1000;
+    private static final int PAGE_SIZE = 50000;
 
     private final Logger logger = LoggerFactory.getLogger(PurgeTask.class);
     private final SchedulingDescriptorKey schedulingDescriptorKey;
@@ -108,17 +107,10 @@ public class PurgeTask extends StartupScheduledTask {
     private void markNotificationsToPurge(OffsetDateTime date) {
         try {
             logger.info("Start marking notifications for purge created earlier than {}...", date);
-            int numPagesForPurge = 0;
             int totalMarked = 0;
             AlertPagedModel<AlertNotificationModel> pageOfAlertNotificationModels;
             while (notificationAccessor.existsNotificationsToMarkForRemoval(date)) {
-                pageOfAlertNotificationModels = notificationAccessor.findFirstPageOfNotificationsToMarkForRemoval(date, PAGE_SIZE);
-                List<AlertNotificationModel> notifications = pageOfAlertNotificationModels.getModels();
-                totalMarked += notificationAccessor.markNotificationsToRemove(notifications);
-                numPagesForPurge++;
-                logger.trace("Mark for purge page: {}. New pages found: {}",
-                    numPagesForPurge,
-                    pageOfAlertNotificationModels.getTotalPages());
+                totalMarked += notificationAccessor.markNotificationsToRemove(date, PAGE_SIZE);
             }
             boolean notificationsToPurge = notificationAccessor.existsNotificationsToRemove();
             logger.info("Marked {} notifications for purge", totalMarked);

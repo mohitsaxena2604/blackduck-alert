@@ -536,8 +536,8 @@ public class NotificationAccessorTestIT {
         notificationContentRepository.saveAll(List.of(notification1, notification2, notification3, notification4));
         AlertPagedModel<AlertNotificationModel> notifications = notificationAccessor.findFirstPageOfNotificationsToMarkForRemoval(oneAndAHalfHoursAgo, 100);
         notificationAccessor.markNotificationsToRemove(notifications.getModels());
-        int notificationsDeleted = notificationAccessor.deleteNotificationsForRemoval(100);
-        assertEquals(3, notificationsDeleted);
+        notificationAccessor.deleteNotificationsForRemoval(100);
+        assertEquals(1, notificationAccessor.findByCreatedAtBetween(notification4.getCreatedAt(), notification1.getCreatedAt()).size());
     }
 
     private AlertNotificationModel createNotificationModel(OffsetDateTime createdAt) {

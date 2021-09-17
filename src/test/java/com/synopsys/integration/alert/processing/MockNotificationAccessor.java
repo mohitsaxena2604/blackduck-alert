@@ -158,8 +158,7 @@ public class MockNotificationAccessor implements NotificationAccessor {
     }
 
     @Override
-    public int deleteNotificationsForRemoval(int pageSize) {
-        int deletedCount = 0;
+    public void deleteNotificationsForRemoval(int pageSize) {
         List<AlertNotificationModel> notificationsToRemove = alertNotificationModels.stream()
             .filter(AlertNotificationModel::getRemove)
             .collect(Collectors.toList());
@@ -167,9 +166,7 @@ public class MockNotificationAccessor implements NotificationAccessor {
         for (int index = 0; index < count; index++) {
             AlertNotificationModel savedModel = notificationsToRemove.get(index);
             alertNotificationModels.remove(savedModel);
-            deletedCount++;
         }
-        return deletedCount;
     }
 
     @Override
@@ -181,6 +178,21 @@ public class MockNotificationAccessor implements NotificationAccessor {
     @Override
     public boolean existsNotificationsToRemove() {
         return alertNotificationModels.stream().anyMatch(AlertNotificationModel::getRemove);
+    }
+
+    @Override
+    public int markNotificationsToRemove(OffsetDateTime createdBefore, int pageSize) {
+        List<AlertNotificationModel> notificationsToRemove = alertNotificationModels.stream()
+            .filter(notification -> !notification.getRemove() && notification.getCreatedAt().isBefore(createdBefore))
+            .collect(Collectors.toList());
+        int count = notificationsToRemove.size() < pageSize ? notificationsToRemove.size() : pageSize;
+        for (int index = 0; index < count; index++) {
+            AlertNotificationModel modelToUpdate = notificationsToRemove.get(index);
+            alertNotificationModels.remove(modelToUpdate);
+            alertNotificationModels.add(createRemoveAlertNotificationModel(modelToUpdate));
+        }
+
+        return count;
     }
 
     //AlertNotificationModel is immutable, this is a workaround for the unit test to set "processed" to true.

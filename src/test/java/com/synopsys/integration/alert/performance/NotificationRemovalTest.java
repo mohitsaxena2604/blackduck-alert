@@ -65,7 +65,7 @@ public class NotificationRemovalTest {
     private static final Gson GSON = new GsonBuilder().create();
     private static final String PROJECT_NAME = "1234 - Test Project";
     private static final UUID JOB_ID = UUID.randomUUID();
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 10000;
     private static final String BLACKDUCK_PROVIDER_URL = "https://blackduck.server.example.com";
 
     @Autowired
@@ -108,9 +108,9 @@ public class NotificationRemovalTest {
         providerConfig = createBlackDuckConfiguration();
         OffsetDateTime testStartTime = OffsetDateTime.now();
         OffsetDateTime notificationCreatedAtTime = OffsetDateTime.now();
-        // create 1000 processed notifications not for removal
+        // create 10000 processed notifications not for removal
         createABatchOfNotifications(providerConfig, testStartTime, true);
-        // create 9000 for removal with varying dates and processed flags
+        // create 90000 for removal with varying dates and processed flags
         for (int index = 0; index < 9; index++) {
             boolean processed = index % 2 == 0 ? true : false;
             // update the createdAt time to be 1 month older
