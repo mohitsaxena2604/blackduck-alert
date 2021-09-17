@@ -158,17 +158,16 @@ public class MockNotificationAccessor implements NotificationAccessor {
     }
 
     @Override
-    public int deleteNotifications(List<AlertNotificationModel> notifications) {
-        int count = alertNotificationModels.size();
+    public int deleteNotificationsForRemoval(int pageSize) {
         int deletedCount = 0;
+        List<AlertNotificationModel> notificationsToRemove = alertNotificationModels.stream()
+            .filter(AlertNotificationModel::getRemove)
+            .collect(Collectors.toList());
+        int count = notificationsToRemove.size() < pageSize ? notificationsToRemove.size() : pageSize;
         for (int index = 0; index < count; index++) {
-            AlertNotificationModel savedModel = alertNotificationModels.get(index);
-            boolean delete = notifications.stream()
-                .anyMatch(notificationToDelete -> savedModel.getId().equals(notificationToDelete.getId()));
-            if (delete) {
-                deletedCount++;
-                alertNotificationModels.remove(index);
-            }
+            AlertNotificationModel savedModel = notificationsToRemove.get(index);
+            alertNotificationModels.remove(savedModel);
+            deletedCount++;
         }
         return deletedCount;
     }

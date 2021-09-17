@@ -519,7 +519,7 @@ public class NotificationAccessorTestIT {
     }
 
     @Test
-    public void deleteNotificationsByIdTest() {
+    public void deleteNotificationsForRemovalTest() {
         OffsetDateTime currentTime = DateUtils.createCurrentDateTimestamp();
         OffsetDateTime oneHourAgo = currentTime.minusHours(1);
         OffsetDateTime oneAndAHalfHoursAgo = oneHourAgo.minusMinutes(30);
@@ -536,8 +536,7 @@ public class NotificationAccessorTestIT {
         notificationContentRepository.saveAll(List.of(notification1, notification2, notification3, notification4));
         AlertPagedModel<AlertNotificationModel> notifications = notificationAccessor.findFirstPageOfNotificationsToMarkForRemoval(oneAndAHalfHoursAgo, 100);
         notificationAccessor.markNotificationsToRemove(notifications.getModels());
-        AlertPagedModel<AlertNotificationModel> notificationsToRemove = notificationAccessor.getFirstPageOfNotificationsToRemove(100);
-        int notificationsDeleted = notificationAccessor.deleteNotifications(notificationsToRemove.getModels());
+        int notificationsDeleted = notificationAccessor.deleteNotificationsForRemoval(100);
         assertEquals(3, notificationsDeleted);
     }
 
