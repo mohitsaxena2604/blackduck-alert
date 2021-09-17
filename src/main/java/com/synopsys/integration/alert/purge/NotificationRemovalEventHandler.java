@@ -18,7 +18,7 @@ import com.synopsys.integration.alert.common.persistence.accessor.NotificationAc
 
 @Component
 public class NotificationRemovalEventHandler implements AlertEventHandler<NotificationRemovalEvent> {
-    private static final int PAGE_SIZE = 10000;
+    private static final int PAGE_SIZE = 50000;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private NotificationAccessor notificationAccessor;
@@ -32,11 +32,9 @@ public class NotificationRemovalEventHandler implements AlertEventHandler<Notifi
     public void handle(NotificationRemovalEvent event) {
         logger.debug("Event {}", event);
         logger.info("Start notification removal event {}.", event.getEventId());
-        int totalRemoved = 0;
         while (notificationAccessor.existsNotificationsToRemove()) {
-            totalRemoved += notificationAccessor.deleteNotificationsForRemoval(PAGE_SIZE);
+            notificationAccessor.deleteNotificationsForRemoval(PAGE_SIZE);
         }
-        logger.info("Purge event {}: Removed {} notifications", event.getEventId(), totalRemoved);
         logger.info("Finished notification removal event {}.", event.getEventId());
         notificationAccessor.getFirstPageOfNotificationsToRemove(PAGE_SIZE);
     }

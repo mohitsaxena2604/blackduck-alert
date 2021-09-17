@@ -107,11 +107,25 @@ public interface NotificationContentRepository extends JpaRepository<Notificatio
     )
     int bulkDeleteByIds(@Param("notificationIds") Set<Long> notificationIds);
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(nativeQuery = true,
+        value = "UPDATE alert.raw_notification_content"
+                    + " SET remove = true"
+                    + " WHERE id IN ("
+                    + "     SELECT id FROM alert.raw_notification_content"
+                    + "         WHERE created_at < :createdBefore"
+                    + "         AND remove = false"
+                    + "         LIMIT :pageSize"
+                    + " )"
+    )
+    int setRemoveByRemoveFalse(@Param("createdBefore") OffsetDateTime createdBefore, @Param("pageSize") int pageSize);
+
+    @Modifying
     @Query(nativeQuery = true,
         value = "DELETE FROM alert.raw_notification_content"
                     + " WHERE id IN (SELECT id FROM alert.raw_notification_content"
                     + "                 WHERE remove = true"
                     + "                 LIMIT :pageSize)"
     )
-    int bulkDeleteByRemoveTrue(@Param("pageSize") int pageize);
+    void bulkDeleteByRemoveTrue(@Param("pageSize") int pageSize);
 }
