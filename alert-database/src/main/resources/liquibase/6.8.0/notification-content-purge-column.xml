@@ -9,7 +9,7 @@
             </not>
         </preConditions>
         <addColumn schemaName="alert" tableName="raw_notification_content">
-            <column name="remove" type="BOOLEAN" valueBoolean="true" defaultValueBoolean="false"/>
+            <column name="remove" type="BOOLEAN" valueBoolean="false" defaultValueBoolean="false"/>
         </addColumn>
     </changeSet>
 

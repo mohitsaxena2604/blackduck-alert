@@ -7,6 +7,9 @@
  */
 package com.synopsys.integration.alert.purge;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +33,16 @@ public class NotificationRemovalEventHandler implements AlertEventHandler<Notifi
 
     @Override
     public void handle(NotificationRemovalEvent event) {
+        OffsetDateTime start = OffsetDateTime.now();
         logger.debug("Event {}", event);
         logger.info("Start notification removal event {}.", event.getEventId());
+        //TODO have this post another event to keep removing batches.
         while (notificationAccessor.existsNotificationsToRemove()) {
             notificationAccessor.deleteNotificationsForRemoval(PAGE_SIZE);
         }
+        OffsetDateTime end = OffsetDateTime.now();
+        Duration duration = Duration.between(start, end);
+        logger.info("Notification removal event took {}", duration.toString());
         logger.info("Finished notification removal event {}.", event.getEventId());
-        notificationAccessor.getFirstPageOfNotificationsToRemove(PAGE_SIZE);
     }
 }

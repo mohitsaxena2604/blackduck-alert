@@ -196,7 +196,7 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
 
     @Override
     public boolean existsNotificationsToRemove() {
-        return notificationContentRepository.existsNotificationEntitiesByRemoveIsTrue();
+        return notificationContentRepository.existsNotificationEntitiesByRemoveTrue();
     }
 
     @Override

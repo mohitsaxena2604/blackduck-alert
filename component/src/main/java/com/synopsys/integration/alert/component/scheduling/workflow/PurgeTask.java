@@ -7,6 +7,7 @@
  */
 package com.synopsys.integration.alert.component.scheduling.workflow;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -28,8 +29,6 @@ import com.synopsys.integration.alert.common.persistence.accessor.NotificationAc
 import com.synopsys.integration.alert.common.persistence.accessor.SystemMessageAccessor;
 import com.synopsys.integration.alert.common.persistence.model.ConfigurationFieldModel;
 import com.synopsys.integration.alert.common.persistence.model.ConfigurationModel;
-import com.synopsys.integration.alert.common.rest.model.AlertNotificationModel;
-import com.synopsys.integration.alert.common.rest.model.AlertPagedModel;
 import com.synopsys.integration.alert.common.util.DateUtils;
 import com.synopsys.integration.alert.component.scheduling.SchedulingConfiguration;
 import com.synopsys.integration.alert.component.scheduling.descriptor.SchedulingDescriptor;
@@ -105,23 +104,27 @@ public class PurgeTask extends StartupScheduledTask {
     }
 
     private void markNotificationsToPurge(OffsetDateTime date) {
+        OffsetDateTime startTime = OffsetDateTime.now();
         try {
             logger.info("Start marking notifications for purge created earlier than {}...", date);
             int totalMarked = 0;
-            AlertPagedModel<AlertNotificationModel> pageOfAlertNotificationModels;
             while (notificationAccessor.existsNotificationsToMarkForRemoval(date)) {
                 totalMarked += notificationAccessor.markNotificationsToRemove(date, PAGE_SIZE);
             }
             boolean notificationsToPurge = notificationAccessor.existsNotificationsToRemove();
             logger.info("Marked {} notifications for purge", totalMarked);
             logger.info("Notifications to remove from database: {}", notificationsToPurge);
-            logger.info("Finished marking notifications for purge created earlier than {}...", date);
             if (notificationsToPurge) {
                 eventManager.sendEvent(new NotificationRemovalEvent());
             }
 
         } catch (Exception ex) {
             logger.error("Error marking notifications to purge", ex);
+        } finally {
+            OffsetDateTime endTime = OffsetDateTime.now();
+            Duration duration = Duration.between(startTime, endTime);
+            logger.info("Marking notifications for purge took {}", duration.toString());
+            logger.info("Finished marking notifications for purge created earlier than {}...", date);
         }
     }
 

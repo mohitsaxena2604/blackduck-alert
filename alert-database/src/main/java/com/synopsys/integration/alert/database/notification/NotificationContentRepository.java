@@ -97,7 +97,7 @@ public interface NotificationContentRepository extends JpaRepository<Notificatio
     )
     Page<NotificationEntity> findByCreatedAtBeforeAndRemoveFalse(OffsetDateTime date, Pageable pageable);
 
-    boolean existsNotificationEntitiesByRemoveIsTrue();
+    boolean existsNotificationEntitiesByRemoveTrue();
 
     Page<NotificationEntity> findByRemoveTrueOrderByCreatedAtAsc(Pageable pageable);
 
