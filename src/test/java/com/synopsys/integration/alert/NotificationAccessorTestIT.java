@@ -30,7 +30,6 @@ import com.synopsys.integration.alert.common.persistence.accessor.ConfigurationA
 import com.synopsys.integration.alert.common.persistence.model.ConfigurationFieldModel;
 import com.synopsys.integration.alert.common.persistence.model.ConfigurationModel;
 import com.synopsys.integration.alert.common.rest.model.AlertNotificationModel;
-import com.synopsys.integration.alert.common.rest.model.AlertPagedModel;
 import com.synopsys.integration.alert.common.util.DateUtils;
 import com.synopsys.integration.alert.database.api.DefaultNotificationAccessor;
 import com.synopsys.integration.alert.database.audit.AuditEntryEntity;
@@ -402,38 +401,6 @@ public class NotificationAccessorTestIT {
     }
 
     @Test
-    public void markNotificationsToPurgeTest() {
-        AlertNotificationModel notificationModel = createNotificationModel();
-
-        List<AlertNotificationModel> savedModels = notificationAccessor.saveAllNotifications(List.of(notificationModel));
-
-        notificationAccessor.markNotificationsToRemove(savedModels);
-
-        assertEquals(1, savedModels.size());
-        Optional<AlertNotificationModel> alertNotificationModelTest = notificationAccessor.findById(savedModels.get(0).getId());
-        assertTrue(alertNotificationModelTest.isPresent());
-        assertTrue(alertNotificationModelTest.get().getRemove());
-    }
-
-    @Test
-    public void markNotificationsToRemoveByIdTest() {
-        AlertNotificationModel notificationModel = createNotificationModel();
-
-        List<AlertNotificationModel> savedModels = notificationAccessor.saveAllNotifications(List.of(notificationModel));
-        List<Long> notificationIds = savedModels
-            .stream()
-            .map(AlertNotificationModel::getId)
-            .collect(Collectors.toList());
-
-        notificationAccessor.markNotificationsToRemoveById(new HashSet<>(notificationIds));
-
-        assertEquals(1, notificationIds.size());
-        Optional<AlertNotificationModel> alertNotificationModelTest = notificationAccessor.findById(notificationIds.get(0));
-        assertTrue(alertNotificationModelTest.isPresent());
-        assertTrue(alertNotificationModelTest.get().getRemove());
-    }
-
-    @Test
     public void existsNotificationsToMarkForPurgeTest() {
         OffsetDateTime currentTime = DateUtils.createCurrentDateTimestamp();
         OffsetDateTime oneHourAgo = currentTime.minusHours(1);
@@ -454,26 +421,6 @@ public class NotificationAccessorTestIT {
     }
 
     @Test
-    public void findFirstPageOfNotificationsToMarkForRemovalTest() {
-        OffsetDateTime currentTime = DateUtils.createCurrentDateTimestamp();
-        OffsetDateTime oneHourAgo = currentTime.minusHours(1);
-        OffsetDateTime oneAndAHalfHoursAgo = oneHourAgo.minusMinutes(30);
-        OffsetDateTime twoHoursAgo = currentTime.minusHours(2);
-        OffsetDateTime threeHoursAgo = currentTime.minusHours(3);
-        OffsetDateTime oneDayAgo = currentTime.minusDays(1);
-
-        NotificationEntity notification1 = createNotificationContent(oneHourAgo);
-        // These notifications should be deleted
-        NotificationEntity notification2 = createNotificationContent(twoHoursAgo);
-        NotificationEntity notification3 = createNotificationContent(threeHoursAgo);
-        NotificationEntity notification4 = createNotificationContent(oneDayAgo);
-
-        notificationContentRepository.saveAll(List.of(notification1, notification2, notification3, notification4));
-        AlertPagedModel<AlertNotificationModel> notifications = notificationAccessor.findFirstPageOfNotificationsToMarkForRemoval(oneAndAHalfHoursAgo, 100);
-        assertEquals(3, notifications.getModels().size());
-    }
-
-    @Test
     public void existsNotificationsToRemoveTest() {
         OffsetDateTime currentTime = DateUtils.createCurrentDateTimestamp();
         OffsetDateTime oneHourAgo = currentTime.minusHours(1);
@@ -489,33 +436,9 @@ public class NotificationAccessorTestIT {
         NotificationEntity notification4 = createNotificationContent(oneDayAgo);
 
         notificationContentRepository.saveAll(List.of(notification1, notification2, notification3, notification4));
-        AlertPagedModel<AlertNotificationModel> notifications = notificationAccessor.findFirstPageOfNotificationsToMarkForRemoval(oneAndAHalfHoursAgo, 100);
-        notificationAccessor.markNotificationsToRemove(notifications.getModels());
+        notificationAccessor.markNotificationsToRemove(oneAndAHalfHoursAgo, 100);
         boolean notificationsToRemove = notificationAccessor.existsNotificationsToRemove();
         assertTrue(notificationsToRemove);
-    }
-
-    @Test
-    public void getFirstPageOfNotificationsToRemoveTest() {
-        OffsetDateTime currentTime = DateUtils.createCurrentDateTimestamp();
-        OffsetDateTime oneHourAgo = currentTime.minusHours(1);
-        OffsetDateTime oneAndAHalfHoursAgo = oneHourAgo.minusMinutes(30);
-        OffsetDateTime twoHoursAgo = currentTime.minusHours(2);
-        OffsetDateTime threeHoursAgo = currentTime.minusHours(3);
-        OffsetDateTime oneDayAgo = currentTime.minusDays(1);
-
-        NotificationEntity notification1 = createNotificationContent(oneHourAgo);
-        // These notifications should be deleted
-        NotificationEntity notification2 = createNotificationContent(twoHoursAgo);
-        NotificationEntity notification3 = createNotificationContent(threeHoursAgo);
-        NotificationEntity notification4 = createNotificationContent(oneDayAgo);
-
-        notificationContentRepository.saveAll(List.of(notification1, notification2, notification3, notification4));
-        AlertPagedModel<AlertNotificationModel> notifications = notificationAccessor.findFirstPageOfNotificationsToMarkForRemoval(oneAndAHalfHoursAgo, 100);
-        int markedNotifications = notificationAccessor.markNotificationsToRemove(notifications.getModels());
-        assertEquals(3, markedNotifications);
-        AlertPagedModel<AlertNotificationModel> notificationsToRemove = notificationAccessor.getFirstPageOfNotificationsToRemove(100);
-        assertEquals(3, notificationsToRemove.getModels().size());
     }
 
     @Test
@@ -534,8 +457,7 @@ public class NotificationAccessorTestIT {
         NotificationEntity notification4 = createNotificationContent(oneDayAgo);
 
         notificationContentRepository.saveAll(List.of(notification1, notification2, notification3, notification4));
-        AlertPagedModel<AlertNotificationModel> notifications = notificationAccessor.findFirstPageOfNotificationsToMarkForRemoval(oneAndAHalfHoursAgo, 100);
-        notificationAccessor.markNotificationsToRemove(notifications.getModels());
+        notificationAccessor.markNotificationsToRemove(oneAndAHalfHoursAgo, 100);
         notificationAccessor.deleteNotificationsForRemoval(100);
         assertEquals(1, notificationAccessor.findByCreatedAtBetween(notification4.getCreatedAt(), notification1.getCreatedAt()).size());
     }

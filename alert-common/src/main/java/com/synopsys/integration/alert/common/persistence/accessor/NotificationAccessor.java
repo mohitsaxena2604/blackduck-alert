@@ -41,17 +41,9 @@ public interface NotificationAccessor {
 
     boolean existsNotificationsToMarkForRemoval(OffsetDateTime date);
 
-    AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForRemoval(OffsetDateTime date, int pageSize);
-
-    AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToRemove(int pageSize);
-
     boolean existsNotificationsToRemove();
 
     void deleteNotificationsForRemoval(int pageSize);
-
-    int markNotificationsToRemove(List<AlertNotificationModel> notifications);
-
-    int markNotificationsToRemoveById(Set<Long> notificationIds);
 
     int markNotificationsToRemove(OffsetDateTime createdBefore, int pageSize);
 

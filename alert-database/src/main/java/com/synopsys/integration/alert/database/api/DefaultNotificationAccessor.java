@@ -185,43 +185,8 @@ public class DefaultNotificationAccessor implements NotificationAccessor {
     }
 
     @Override
-    public AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForRemoval(OffsetDateTime date, int pageSize) {
-        int currentPage = 0;
-        PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
-        Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByCreatedAtBeforeAndRemoveFalse(date, pageRequest)
-            .map(this::toModel);
-        List<AlertNotificationModel> alertNotificationModels = pageOfNotifications.getContent();
-        return new AlertPagedModel<>(pageOfNotifications.getTotalPages(), currentPage, pageSize, alertNotificationModels);
-    }
-
-    @Override
     public boolean existsNotificationsToRemove() {
         return notificationContentRepository.existsNotificationEntitiesByRemoveTrue();
-    }
-
-    @Override
-    public AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToRemove(int pageSize) {
-        int currentPage = 0;
-        PageRequest pageRequest = PageRequest.of(currentPage, pageSize);
-        Page<AlertNotificationModel> pageOfNotifications = notificationContentRepository.findByRemoveTrueOrderByCreatedAtAsc(pageRequest)
-            .map(this::toModel);
-        List<AlertNotificationModel> alertNotificationModels = pageOfNotifications.getContent();
-        return new AlertPagedModel<>(pageOfNotifications.getTotalPages(), currentPage, pageSize, alertNotificationModels);
-    }
-
-    @Override
-    public int markNotificationsToRemove(List<AlertNotificationModel> notifications) {
-        Set<Long> notificationIds = notifications
-            .stream()
-            .map(AlertNotificationModel::getId)
-            .collect(Collectors.toSet());
-        return markNotificationsToRemoveById(notificationIds);
-    }
-
-    @Override
-    @Transactional
-    public int markNotificationsToRemoveById(Set<Long> notificationIds) {
-        return notificationContentRepository.setRemoveByIds(notificationIds);
     }
 
     @Override

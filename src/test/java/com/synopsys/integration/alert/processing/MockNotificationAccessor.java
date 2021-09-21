@@ -114,50 +114,6 @@ public class MockNotificationAccessor implements NotificationAccessor {
     }
 
     @Override
-    public AlertPagedModel<AlertNotificationModel> findFirstPageOfNotificationsToMarkForRemoval(OffsetDateTime date, int pageSize) {
-        ArrayList<AlertNotificationModel> models = new ArrayList<>(pageSize);
-        models.addAll(alertNotificationModels.stream()
-            .filter(notification -> createdBeforePredicate.test(notification, date))
-            .collect(Collectors.toList()));
-        int totalPages = models.size() / pageSize;
-        return new AlertPagedModel<>(totalPages, 0, pageSize, models);
-    }
-
-    @Override
-    public AlertPagedModel<AlertNotificationModel> getFirstPageOfNotificationsToRemove(int pageSize) {
-        ArrayList<AlertNotificationModel> models = new ArrayList<>(pageSize);
-        models.addAll(alertNotificationModels.stream()
-            .filter(AlertNotificationModel::getRemove)
-            .collect(Collectors.toList()));
-        int totalPages = models.size() / pageSize;
-        return new AlertPagedModel<>(totalPages, 0, pageSize, models);
-    }
-
-    @Override
-    public int markNotificationsToRemove(List<AlertNotificationModel> notifications) {
-        Set<Long> notificationIds = notifications.stream()
-            .map(AlertNotificationModel::getId)
-            .collect(Collectors.toSet());
-        return markNotificationsToRemoveById(notificationIds);
-    }
-
-    @Override
-    public int markNotificationsToRemoveById(Set<Long> notificationIds) {
-        int count = alertNotificationModels.size();
-        int updatedCount = 0;
-        for (int index = 0; index < count; index++) {
-            AlertNotificationModel savedModel = alertNotificationModels.get(index);
-            boolean update = notificationIds.stream()
-                .anyMatch(notificationIdToMark -> savedModel.getId().equals(notificationIdToMark));
-            if (update) {
-                updatedCount++;
-                alertNotificationModels.set(index, createRemoveAlertNotificationModel(savedModel));
-            }
-        }
-        return updatedCount;
-    }
-
-    @Override
     public void deleteNotificationsForRemoval(int pageSize) {
         List<AlertNotificationModel> notificationsToRemove = alertNotificationModels.stream()
             .filter(AlertNotificationModel::getRemove)
