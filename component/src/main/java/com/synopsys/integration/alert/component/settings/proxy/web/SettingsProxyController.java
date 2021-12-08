@@ -19,10 +19,10 @@ import com.synopsys.integration.alert.common.rest.api.ReadPageController;
 import com.synopsys.integration.alert.common.rest.api.StaticConfigResourceController;
 import com.synopsys.integration.alert.common.rest.api.ValidateController;
 import com.synopsys.integration.alert.common.rest.model.AlertPagedModel;
+import com.synopsys.integration.alert.common.rest.model.SettingsProxyModel;
 import com.synopsys.integration.alert.common.rest.model.ValidationResponseModel;
 import com.synopsys.integration.alert.component.settings.proxy.action.SettingsProxyCrudActions;
 import com.synopsys.integration.alert.component.settings.proxy.action.SettingsProxyValidationAction;
-import com.synopsys.integration.alert.component.settings.proxy.model.SettingsProxyModel;
 
 @RestController
 @RequestMapping(AlertRestConstants.SETTINGS_PROXY_PATH)
