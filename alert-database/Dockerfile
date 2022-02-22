@@ -1,4 +1,4 @@
-FROM postgres:12.2-alpine
+FROM postgres:12-alpine
 
 ENV DOCKER_ENTRYPPOINT_INITD_DIR /docker-entrypoint-initdb.d
 
